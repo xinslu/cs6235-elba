@@ -20,7 +20,7 @@ request = pc.makeRequestRSpec()
 
 node_cnt = 12
 nodes = []
-hw_type = 'r320'
+hw_type = 'd710'
 disk_img = 'urn:publicid:IDN+emulab.net+image+emulab-ops//UBUNTU20-64-STD'
 for node_idx in range(node_cnt):
     node_new = request.RawPC('node-%s' % node_idx)

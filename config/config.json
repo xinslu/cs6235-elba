@@ -1,5 +1,5 @@
 {
-    "username": "$your_cloud_lab_username",
-    "experiment_name": "$username-six_digit_number",
-    "ssh_host": "$host_ssh_name"
+    "username": "kinshuk",
+    "experiment_name": "kinshuk-001001",
+    "ssh_host": "emulab.net"
 }

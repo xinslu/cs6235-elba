@@ -295,14 +295,32 @@ def removeCustomJob():
     except ValueError:
         print("Invalid input. Please enter a numerical job number.")
 
+def print_help():
+    help_text = """
+Usage: JobManager.py [OPTION]
+Manage social network deployment jobs.
+
+Options:
+    -h, --help     Show this help message
+    -preset        Load and run a preset job configuration
+    -custom        Load and run a custom job configuration
+    -remove        Remove a custom job
+    -chain         Chain multiple custom jobs together
+    -edit          Edit an existing custom job
+    
+If no option is provided, runs the default setup wizard.
+    """
+    print(help_text)
 
 if not (len(sys.argv) > 1):
     defaultSetup()
-elif (sys.argv[1] == '-preset'):
+elif sys.argv[1] in ['-h', '--help']:
+    print_help()
+elif sys.argv[1] == '-preset':
     loadSavedJobs(1)
-elif (sys.argv[1] == '-custom'):
+elif sys.argv[1] == '-custom':
     loadSavedJobs(2)
-elif (sys.argv[1] == '-remove'):
+elif sys.argv[1] == '-remove':
     removeCustomJob()
 elif sys.argv[1] == '-chain':
     custom_jobs = listCustomJobs()
@@ -311,5 +329,5 @@ elif sys.argv[1] == '-chain':
 elif sys.argv[1] == '-edit':
     editCustomJob()
 else:
-    print("ERROR: Unknown argument into JobManager")
-    print("USAGE: JobManager.py [-p/-c/(none)] // -p: Pre-defined Setup / -c: Custom Setup")
+    print("Error: Invalid argument provided")
+    print("Use 'JobManager.py -h' for usage information")

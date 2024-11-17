@@ -8,38 +8,47 @@ from pathlib import Path
 
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument('-n', '--number', type=int, required=True, help='Docker Swarm Cluter Size')
+    parser.add_argument('-n', '--number', type=int, required=True, help='Docker Swarm Cluster Size')
     parser.add_argument('-a', '--ip', type=str, required=True, help='Mgr IP')
     parser.add_argument('-cn', '--client-number', type=int, required=True, help='Client Cluster Size')
     return parser.parse_args()
 
-install_docker = '''sudo apt-get update && \
+install_docker = '''if ! command -v docker &> /dev/null; then
+echo "Installing docker"
+sudo apt-get update && \
 sudo DEBIAN_FRONTEND=noninteractive apt-get -y install \
 ca-certificates curl gnupg lsb-release && \
 sudo install -m 0755 -d /etc/apt/keyrings && \
 curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg && \
-echo \"deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable\" | \
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | \
 sudo tee /etc/apt/sources.list.d/docker.list > /dev/null && \
 sudo apt-get update && \
-sudo DEBIAN_FRONTEND=noninteractive apt-get install -y docker-ce docker-ce-cli containerd.io'''
+sudo DEBIAN_FRONTEND=noninteractive apt-get install -y docker-ce docker-ce-cli containerd.io
+else
+echo "Docker Already Installed"
+fi
+'''
 install_collectl = 'sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y collectl'
 install_sysdig = 'sudo apt-get update && sudo DEBIAN_FRONTEND=noninteractive apt-get install -y sysdig'
 clone_official_socialnetwork_repo = 'ssh-keygen -F github.com || ssh-keyscan github.com >> ~/.ssh/known_hosts && git clone https://github.com/delimitrou/DeathStarBench.git && cd DeathStarBench && git checkout b2b7af9 && cd ..'
+delete_repo = 'rm -rf DeathStarBench'
 args = parse_args()
 
 with ThreadingGroup(*[f'node-{idx}' for idx in range(0, args.number)]) as swarm_grp, \
      ThreadingGroup(*[f'node-{idx}' for idx in range(args.number, args.number + args.client_number)]) as client_grp:
+    swarm_grp.run(delete_repo)
+    print('** DeathStarBench deleted **')
     swarm_grp.run(install_collectl)
     print('** collectl installed **')
     swarm_grp.run(clone_official_socialnetwork_repo)
     print('** socialNetwork cloned **')
     swarm_grp.run(install_docker)
     print('** docker installed **')
+    
 
     def stop_swarm_cluster():
-        swarm_grp.run('sudo docker swarm leave')
-        subprocess.run(shlex.split('sudo docker swarm leave -f'))
-    # stop_swarm_cluster()
+        swarm_grp.run('sudo docker swarm leave -f')
+    stop_swarm_cluster()
     def clear_env():
         swarm_grp.run('sudo apt-get -y purge docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras')
         swarm_grp.run('for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove $pkg; done')
@@ -64,17 +73,19 @@ with ThreadingGroup(*[f'node-{idx}' for idx in range(0, args.number)]) as swarm_
         grp_worker.put(Path.home()/'.ssh'/'id_rsa', '.ssh')
     print('** swarm cluster ready **')
 
-    subprocess.run(shlex.split('sudo docker service create --name registry \
-                               --publish published=5000,target=5000 registry:2'))
+    subprocess.run(shlex.split('sudo docker service create --name registry --publish published=5000,target=5000 registry:2'))
     print('** registry service created **')
 
     client_grp[0].run(install_sysdig)
     client_grp.put(Path.home()/'.ssh/id_rsa', '.ssh')
     client_grp.run('if [ ! -e "$HOME/.ssh/config" ]; then echo -e "Host *\n\tStrictHostKeyChecking no" >> $HOME/.ssh/config; fi')
     client_grp.put(Path.home()/'RubbosClient.zip')
+    client_grp.run('rm -rf RubbosClient')
+    client_grp.run('rm -rf elba')
+    client_grp.run('rm -rf rubbos')
     client_grp.run('unzip RubbosClient.zip')
-    client_grp.run('mv RubbosClient/elba .')
-    client_grp.run('mv RubbosClient/rubbos .')
+    client_grp.run('mv -f RubbosClient/elba .')
+    client_grp.run('mv -f RubbosClient/rubbos .')
     client_grp.run('gcc $HOME/elba/rubbos/RUBBoS/bench/flush_cache.c -o $HOME/elba/rubbos/RUBBoS/bench/flush_cache')
     print('** RubbosClient copied **')
 
@@ -96,7 +107,7 @@ with ThreadingGroup(*[f'node-{idx}' for idx in range(0, args.number)]) as swarm_
 
     os.chdir(Path.home())
     subprocess.run('mv socialNetwork/* DeathStarBench/socialNetwork/', shell=True)
-    subprocess.run('mv socialNetwork/scripts/*.sh DeathStarBench/socialNetwork/scripts/', shell=True)
+    subprocess.run('mv -f socialNetwork/scripts/*.sh DeathStarBench/socialNetwork/scripts/', shell=True)
     subprocess.run(shlex.split('rm -r socialNetwork/scripts'))
     os.chdir(Path.home()/'DeathStarBench'/'socialNetwork')
     subprocess.run(shlex.split('sudo ./start.sh start'))

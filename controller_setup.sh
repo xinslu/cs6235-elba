@@ -21,7 +21,17 @@ case "$response" in
     exit
     ;;
 esac
-python config/config.py
+python3 config/config.py
+
+read -r -p "Do you want to delete all zip files? [y/N] " response
+case "$response" in
+  [yY][eE][sS]|[yY])
+    echo "Deleting Files"
+    rm *.zip
+    ;;
+  *)
+    echo "Files will not be regenreated"
+esac
 
 if [ ! -e "socialNetworkLSU.zip" ]
 then
@@ -29,7 +39,7 @@ then
   for f in "RubbosClient" "RubbosClient_src" "scripts_limit" "socialNetwork" "src" "internal_triggers"; do
     zip -r "$f.zip" $f -x '**/.DS_Store' -x '**/__MACOSX'
   done
-  zip -r socialNetworkLSU.zip *.zip -x '**/.*' -x '**/__MACOSX'
+  zip -r socialNetworkLSU.zip *.zip setup_docker_swarm.py -x '**/.*' -x '**/__MACOSX'
 else
   cur_time=$(date +%s)
   last_modified=$(date -r socialNetwork.zip +%s)
@@ -91,6 +101,8 @@ ssh -o StrictHostKeyChecking=no -i ${private_ssh_key_path} ${username}@${control
   git config --global core.editor "vim"
   git clone git@github.com:WindowsXp-Beta/SocialNetwork.git SetupScripts
   unzip socialNetworkLSU
+  rm SetupScripts/setup_docker_swarm.py
+  cp setup_docker_swarm.py SetupScripts/
   sudo apt-get update
   sudo apt-get install -y python3-pip maven pdfgrep
   cd SetupScripts
@@ -98,9 +110,11 @@ ssh -o StrictHostKeyChecking=no -i ${private_ssh_key_path} ${username}@${control
   python setup_docker_swarm.py -a 10.10.1.1 -n ${swarm_node_number} -cn ${client_node_number}
   cd ~/DeathStarBench/socialNetwork
   source set_elba_env.sh
+  chmod -R +x ./scripts/
   ./scripts/CONTROL_exec.sh
   sudo cp /users/${username}/scripts_limit/generateResult.sh /users/${username}/socialNetwork/
   sudo apt install -y python2
   cd /users/${username}/socialNetwork/
-  ./generateResult.sh &> output.log
+  sudo chmod -R +x ./generateResult.sh
+  sudo ./generateResult.sh &> output.log
 "
