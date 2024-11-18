@@ -39,7 +39,7 @@ then
   for f in "RubbosClient" "RubbosClient_src" "scripts_limit" "socialNetwork" "src" "internal_triggers"; do
     zip -r "$f.zip" $f -x '**/.DS_Store' -x '**/__MACOSX'
   done
-  zip -r socialNetworkLSU.zip *.zip setup_docker_swarm.py -x '**/.*' -x '**/__MACOSX'
+  zip -r socialNetworkLSU.zip *.zip setup_docker_swarm.py requirements.txt -x '**/.*' -x '**/__MACOSX'
 else
   cur_time=$(date +%s)
   last_modified=$(date -r socialNetwork.zip +%s)
@@ -89,7 +89,7 @@ done
 
 # Copy the SSH private key to the controller node.
 scp -o StrictHostKeyChecking=no -i ${private_ssh_key_path} ${private_ssh_key_path} ${username}@${controller_node}:.ssh/id_rsa
-scp -o StrictHostKeyChecking=no -i ${private_ssh_key_path} -r socialNetworkLSU.zip ${username}@${controller_node}:socialNetworkLSU
+scp -o StrictHostKeyChecking=no -i ${private_ssh_key_path} -r socialNetworkLSU.zip ${username}@${controller_node}:socialNetworkLSU.zip
 
 # clone env_setup repo in controller node
 ssh -o StrictHostKeyChecking=no -i ${private_ssh_key_path} ${username}@${controller_node} "
@@ -99,10 +99,11 @@ ssh -o StrictHostKeyChecking=no -i ${private_ssh_key_path} ${username}@${control
   git config --global user.email ${git_email}
   git config --global user.name ${username}
   git config --global core.editor "vim"
-  git clone git@github.com:WindowsXp-Beta/SocialNetwork.git SetupScripts
-  unzip socialNetworkLSU
-  rm SetupScripts/setup_docker_swarm.py
+  unzip socialNetworkLSU.zip
+  rm socialNetworkLSU.zip
+  mkdir SetupScripts
   cp setup_docker_swarm.py SetupScripts/
+  cp requirements.txt SetupScripts/
   sudo apt-get update
   sudo apt-get install -y python3-pip maven pdfgrep
   cd SetupScripts

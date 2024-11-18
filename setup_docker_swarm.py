@@ -48,7 +48,7 @@ with ThreadingGroup(*[f'node-{idx}' for idx in range(0, args.number)]) as swarm_
 
     def stop_swarm_cluster():
         swarm_grp.run('sudo docker swarm leave -f')
-    stop_swarm_cluster()
+    # stop_swarm_cluster()
     def clear_env():
         swarm_grp.run('sudo apt-get -y purge docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin docker-ce-rootless-extras')
         swarm_grp.run('for pkg in docker.io docker-doc docker-compose docker-compose-v2 podman-docker containerd runc; do sudo apt-get remove $pkg; done')
@@ -92,6 +92,7 @@ with ThreadingGroup(*[f'node-{idx}' for idx in range(0, args.number)]) as swarm_
     os.chdir(Path.home())
     for file in ['src', 'RubbosClient_src', 'socialNetwork', 'scripts_limit', 'internal_triggers']:
         subprocess.run(shlex.split(f'unzip {file}.zip'))
+        subprocess.run(shlex.split(f'rm {file}.zip'))
     subprocess.run(shlex.split('mv DeathStarBench/socialNetwork/src DeathStarBench/socialNetwork/src.bk'))
     subprocess.run(shlex.split('mv src DeathStarBench/socialNetwork/'))
     os.chdir(Path.home()/'DeathStarBench'/'socialNetwork')
