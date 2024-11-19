@@ -11,8 +11,8 @@ do
 	for j in $(sudo docker ps --format '{{.ID}}')
 	do
 		k=$(sudo docker inspect --format='{{.Config.Hostname}}' $j)
-		sudo docker logs $j >& /tmp/log_$k.log
-		scp /tmp/log_$k.log node-0:/tmp/
+		sudo docker logs $j | sudo tee /experiment-data/log_$k.log > /dev/null
+		sudo scp /experiment-data/log_$k.log node-0:/experiment-data/
 	done
 	'
 done

@@ -26,6 +26,8 @@ for node_idx in range(node_cnt):
     node_new = request.RawPC('node-%s' % node_idx)
     node_new.hardware_type = hw_type
     node_new.disk_image = disk_img
+    bs = node_new.Blockstore("bs-%s" % node_idx, "/experiment-data")
+    bs.size = "32GB"
     nodes.append((node_new, node_new.addInterface('interface-%s' % node_idx)))
 
 # Link link-0

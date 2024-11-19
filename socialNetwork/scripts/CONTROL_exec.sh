@@ -1,13 +1,16 @@
 #!/bin/bash
 
 ssh node-0 "
-  mkdir -p $RUBBOS_RESULTS_DIR_BASE
+  sudo mkdir $RUBBOS_RESULTS_DIR_BASE
 "
 
 ssh benchmark "
   source $HOME/rubbos/set_elba_env.sh
-  mkdir -p $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME
-  rm -rf $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/*
+  echo 'creating directory'
+  sudo mkdir $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME
+  echo 'verifying creation of directory'
+  ls -al $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME
+  sudo rm -rf $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/*
 "
 
 # Trying to simulation 5000 users
@@ -50,31 +53,24 @@ do
     # Collect results
     ./log_time.sh
     echo "The benchmark has finished. Now, collecting results..."
-    mv Experiments_timestamp.log 20*/
-    cd 20*
+    mv Experiments_timestamp.log $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
 
     ssh node-0 "$WORK_HOME/scripts/endCollectl.sh"
     # ssh node-0 "$WORK_HOME/scripts/endSysdig.sh"
-    scp -r node-0:/tmp/*.raw.gz ./
-    ssh node-0 "rm -rf /tmp/*.raw.gz"
+    sudo scp -r node-0:/experiment-data/*.raw.gz $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
     ssh node-0 "$WORK_HOME/scripts/getLogs.sh"
-    scp -r node-0:/tmp/log* ./
-    ssh node-0 "rm -rf /tmp/log*"
-    scp -r node-0:/tmp/node*.log ./
-    ssh node-0 "rm -rf /tmp/node*.log"
-    cp $RUBBOS_HOME/bench/20*/index.html ./
-    cp $RUBBOS_HOME/bench/20*/result*.jtl ./
+    sudo scp -r node-0:/experiment-data/log* $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
+    sudo scp -r node-0:/experiment-data/node*.log $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
+    sudo cp $RUBBOS_HOME/bench/20*/index.html $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
+    sudo cp $RUBBOS_HOME/bench/20*/result*.jtl $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
 
-    # scp node-6:$HOME/node6_sysdig.log ./
-    scp node-0:$WORK_HOME/set_elba_env.sh ./
+    # scp node-6:$HOME/node6_sysdig.log $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
+    sudo scp node-0:$WORK_HOME/set_elba_env.sh $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
 
 
     sleep 2
 
-    cd ..
-    mv 20* $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
-    scp -r $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME $RUBBOS_RESULTS_HOST:$BONN_RUBBOS_RESULTS_DIR_BASE
-    rm -rf $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/*
+    sudo mv 20* $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
   "
 
   ssh node-6 "sudo pkill -9 sysdig"

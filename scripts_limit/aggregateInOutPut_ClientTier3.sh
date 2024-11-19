@@ -1,16 +1,16 @@
 #!/bin/bash
 
-cp ../../../scripts_limit/aggregateInOutPut_ClientTier_ALL.py ./
-cp ../../../scripts_limit/aggregateInOutPut_ClientTier_ExcludeLongReq1.py ./
-cp ../../../scripts_limit/aggregateInOutPut_ClientTier_LongReq1.py ./
-cp ../../../scripts_limit/detailRT_fig3.gnuplot ./
-cp ../../../scripts_limit/histgramPlot.gnuplot ./
-cp ../../../scripts_limit/RT_dist_extract.py ./
-cp ../../../scripts_limit/RT_dist.gnuplot ./
+sudo cp /users/kinshuk/scripts_limit/aggregateInOutPut_ClientTier_ALL.py ./
+sudo cp /users/kinshuk/scripts_limit/aggregateInOutPut_ClientTier_ExcludeLongReq1.py ./
+sudo cp /users/kinshuk/scripts_limit/aggregateInOutPut_ClientTier_LongReq1.py ./
+sudo cp /users/kinshuk/scripts_limit/detailRT_fig3.gnuplot ./
+sudo cp /users/kinshuk/scripts_limit/histgramPlot.gnuplot ./
+sudo cp /users/kinshuk/scripts_limit/RT_dist_extract.py ./
+sudo cp /users/kinshuk/scripts_limit/RT_dist.gnuplot ./
 # cp ../../../scripts_limit/plotPID.gnuplot ./
 
-cp ../../../scripts_limit/RT_Q_conn.gnuplot ./
-cp ../../../scripts_limit/RT_Q_components.gnuplot ./
+sudo cp /users/kinshuk/scripts_limit/RT_Q_conn.gnuplot ./
+sudo cp /users/kinshuk/scripts_limit/RT_Q_components.gnuplot ./
 
 x1=100
 x2=220

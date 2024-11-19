@@ -30,7 +30,7 @@ SOFTWARE_HOME=/home/xgu/rubbos/software
 
 # Output directory for results of RUBBoS benchmark
 RUBBOS_RESULTS_HOST=node-0
-RUBBOS_RESULTS_DIR_BASE=$HOME/socialNetwork
+RUBBOS_RESULTS_DIR_BASE=/experiment-data/socialNetwork
 RUBBOS_RESULTS_DIR_NAME=2023-0408-WL5000-readHomeTimeline
 
 # Output directory for results of RUBBoS benchmark on Bonn and SysViz servers
@@ -49,7 +49,7 @@ SYSVIZ_RUBBOS_RESULTS_DIR_BASE=/home/qywang/AnaResult-CA
 # Target directories
 ELBA_TOP=$HOME/elba
 RUBBOS_TOP=$ELBA_TOP/rubbos
-TMP_RESULTS_DIR_BASE=$HOME/elba/rubbos/results
+TMP_RESULTS_DIR_BASE=/experiment-data
 RUBBOS_HOME=$HOME/elba/rubbos/RUBBoS
 SYSSTAT_HOME=$HOME/elba/rubbos/sysstat-10.0.2
 HTTPD_HOME=/home/xgu/elba/rubbos/apache2

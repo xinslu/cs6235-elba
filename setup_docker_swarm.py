@@ -84,6 +84,7 @@ with ThreadingGroup(*[f'node-{idx}' for idx in range(0, args.number)]) as swarm_
     client_grp.run('rm -rf elba')
     client_grp.run('rm -rf rubbos')
     client_grp.run('unzip RubbosClient.zip')
+    client_grp.run('rm RubbosClient.zip')
     client_grp.run('mv -f RubbosClient/elba .')
     client_grp.run('mv -f RubbosClient/rubbos .')
     client_grp.run('gcc $HOME/elba/rubbos/RUBBoS/bench/flush_cache.c -o $HOME/elba/rubbos/RUBBoS/bench/flush_cache')

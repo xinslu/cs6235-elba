@@ -14,7 +14,7 @@ do
 	ssh $i '
 	sudo pkill collectl
 	'
-	scp $i:/tmp/node* /tmp/
+	sudo scp $i:/experiment-data/node* /experiment-data/
 done
 
 ## example of how to replay back the collectl results
