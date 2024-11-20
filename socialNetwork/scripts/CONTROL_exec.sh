@@ -53,10 +53,9 @@ do
     # Collect results
     ./log_time.sh
     echo "The benchmark has finished. Now, collecting results..."
-    mv Experiments_timestamp.log $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
+    sudo mv Experiments_timestamp.log $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
 
     ssh node-0 "$WORK_HOME/scripts/endCollectl.sh"
-    # ssh node-0 "$WORK_HOME/scripts/endSysdig.sh"
     sudo scp -r node-0:/experiment-data/*.raw.gz $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
     ssh node-0 "$WORK_HOME/scripts/getLogs.sh"
     sudo scp -r node-0:/experiment-data/log* $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
@@ -64,20 +63,14 @@ do
     sudo cp $RUBBOS_HOME/bench/20*/index.html $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
     sudo cp $RUBBOS_HOME/bench/20*/result*.jtl $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
 
-    # scp node-6:$HOME/node6_sysdig.log $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
     sudo scp node-0:$WORK_HOME/set_elba_env.sh $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
-
-
     sleep 2
-
     sudo mv 20* $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
   "
 
   ssh node-6 "sudo pkill -9 sysdig"
 
-  ssh node-0 "
-  $WORK_HOME/scripts/stopall.sh
-  "
+  ssh node-0 "$WORK_HOME/scripts/stopall.sh"
 
   sleep 15
   echo "End Browsing Only with $i"
@@ -89,3 +82,8 @@ done
 
 
 echo "Finish RUBBoS"
+
+
+ssh benchmark "
+    sudo scp -r node-0:$HOME/scripts_limit $HOME/
+"

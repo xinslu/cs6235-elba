@@ -1,14 +1,14 @@
 #!/bin/bash
 set -e
 
-sudo cp /users/kinshuk/scripts_limit/aggregateInOutPut_ALL.py ./
-sudo cp /users/kinshuk/scripts_limit/aggregateInOutPut_ExcludeLongReq1.py ./
-sudo cp /users/kinshuk/scripts_limit/aggregateInOutPut_LongReq1.py ./
-sudo cp /users/kinshuk/scripts_limit/extract_queue_length.py ./
-sudo cp /users/kinshuk/scripts_limit/detailRT_fig3.py ./
-sudo cp /users/kinshuk/scripts_limit/histogram_plot.py ./
-sudo cp /users/kinshuk/scripts_limit/tier_visualization.py ./
-sudo cp /users/kinshuk/scripts_limit/RT_Q_conn.py ./
+sudo cp $HOME/scripts_limit/aggregateInOutPut_ALL.py ./
+sudo cp $HOME/scripts_limit/aggregateInOutPut_ExcludeLongReq1.py ./
+sudo cp $HOME/scripts_limit/aggregateInOutPut_LongReq1.py ./
+sudo cp $HOME/scripts_limit/extract_queue_length.py ./
+sudo cp $HOME/scripts_limit/detailRT_fig3.py ./
+sudo cp $HOME/scripts_limit/histogram_plot.py ./
+sudo cp $HOME/scripts_limit/tier_visualization.py ./
+sudo cp $HOME/scripts_limit/RT_Q_conn.py ./
 
 fileClient=$(ls detailRT-client*.csv)
 sed -i.bak 's/\.//g' $fileClient

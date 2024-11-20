@@ -81,7 +81,7 @@ def processLogBO(startPatternStr):
         # results = commands.getstatusoutput("collectl -sZ -p %s  -P -f %s -oTmza --from %s-%s" % (file,dirName,collectLTimeFormatStart,collectLTimeFormatEnd))
         print results
         if results[0] != 0:
-            print "code: %s  failure to execute the commond: collectl -sCdnZ -p %s  -P -f %s -oUmz --from %s-%s" % (results[0], file,dirName,collectLTimeFormatStart,collectLTimeFormatEnd)
+            print "code: %s  failure to execute the command: collectl -sCdnZ -p %s  -P -f %s -oUmz --from %s-%s" % (results[0], file,dirName,collectLTimeFormatStart,collectLTimeFormatEnd)
             sys.exit(0)
         #results1 = commands.getstatusoutput("collectl -sZ -p %s  -P -f %s -oUmz --from %s-%s" % (file,dirName,collectLTimeFormatStart,collectLTimeFormatEnd))  # add by shungeng
         #print results1

@@ -105,7 +105,7 @@ ssh -o StrictHostKeyChecking=no -i ${private_ssh_key_path} ${username}@${control
   cp setup_docker_swarm.py SetupScripts/
   cp requirements.txt SetupScripts/
   sudo apt-get update
-  sudo apt-get install -y python3-pip maven pdfgrep
+  sudo apt-get install -y python3-pip maven pdfgrep python2
   cd SetupScripts
   pip3 install -r requirements.txt
   python setup_docker_swarm.py -a 10.10.1.1 -n ${swarm_node_number} -cn ${client_node_number}
@@ -114,8 +114,7 @@ ssh -o StrictHostKeyChecking=no -i ${private_ssh_key_path} ${username}@${control
   chmod -R +x ./scripts/
   ./scripts/CONTROL_exec.sh
   sudo cp /users/${username}/scripts_limit/generateResult.sh /experiment-data/socialNetwork/generateResult.sh
-  sudo apt install -y python2
   cd /experiment-data/socialNetwork
   sudo chmod -R +x ./generateResult.sh
-  sudo ./generateResult.sh &> output.log
+  sudo ./generateResult.sh |& sudo tee output.log > /dev/null
 "

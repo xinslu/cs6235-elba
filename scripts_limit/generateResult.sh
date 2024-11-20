@@ -1,6 +1,6 @@
 #!/bin/bash
 
-sudo cp /users/kinshuk/scripts_limit/plotAverage.sh .
+sudo cp $HOME/scripts_limit/plotAverage.sh .
 
 if ! command -v pip2 &> /dev/null
 then
@@ -17,14 +17,14 @@ do
     for j in $( ls -d */ )
     do
         cd $j
-        sudo cp /users/kinshuk/scripts_limit/collectlExtract.py .
-        sudo cp /users/kinshuk/scripts_limit/collectlResultFilter.py .
-        sudo cp /users/kinshuk/scripts_limit/collectlResultFilter2.py .
-        sudo cp /users/kinshuk/scripts_limit/collectlProcExtract.py .
-        sudo cp /users/kinshuk/scripts_limit/front_log_extract.py .
-        sudo cp /users/kinshuk/scripts_limit/client_log_extract.py .
-        sudo cp /users/kinshuk/scripts_limit/service_log_extract.py .
-        sudo cp /users/kinshuk/scripts_limit/aggregateInOutPut_AllTiers.sh .
+        sudo cp $HOME/scripts_limit/collectlExtract.py .
+        sudo cp $HOME/scripts_limit/collectlResultFilter.py .
+        sudo cp $HOME/scripts_limit/collectlResultFilter2.py .
+        sudo cp $HOME/scripts_limit/collectlProcExtract.py .
+        sudo cp $HOME/scripts_limit/front_log_extract.py .
+        sudo cp $HOME/scripts_limit/client_log_extract.py .
+        sudo cp $HOME/scripts_limit/service_log_extract.py .
+        sudo cp $HOME/scripts_limit/aggregateInOutPut_AllTiers.sh .
         echo Copied all python scripts into $j
         python2 collectlExtract.py
         echo RAN collectlExtract.py
