@@ -41,12 +41,12 @@ public:
 
 int main(int argc, char* argv[]) {
 
-    int thread_count = 4;
-    int duration = 1;
+    int thread_count = 10;
+    int duration = 60;
 
     StressTest stress;
     std::cout << "Starting CPU stress test with " << thread_count << " threads for " << duration << " seconds" << std::endl;
-    
+
     stress.start(thread_count);
     std::this_thread::sleep_for(std::chrono::seconds(duration));
     stress.stop();
