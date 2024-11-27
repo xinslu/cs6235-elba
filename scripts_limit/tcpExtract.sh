@@ -1,7 +1,7 @@
 #!/bin/bash
 
-cp ../../scripts_limit/tcpConn.py ./
-cp ../../scripts_limit/RT_Q_tcp.gnuplot ./
+cp $HOME/scripts_limit/tcpConn.py ./
+cp $HOME/scripts_limit/RT_Q_tcp.gnuplot ./
 
 python tcpConn.py
 

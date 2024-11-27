@@ -2,9 +2,8 @@
 
 import math, time, sys, os
 
-
-
-# process options
+# Check if required command line arguments are provided
+# Arguments: timeSpan startTime endTime workload plist_file tier
 if len(sys.argv) >= 6:
     timeSpan = sys.argv[1]
     startTime = sys.argv[2]
@@ -16,19 +15,26 @@ else:
     exit(0)
 
 def init(tier):
+    """Initialize global variables and data structures for tracking metrics
+    
+    Args:
+        tier: The system tier being analyzed
+    """
     global stime_epoch, etime_epoch, HTTP_multi, AJP_multi, CJDBC_multi, MYSQL_multi, HTTP_multi_1sec, AJP_multi_1sec, CJDBC_multi_1sec
     global MYSQL_multi_10ms, multi_count_in_sec, HTTP_input, HTTP_output, HTTP_multi_longReqs
     global HTTP_in, HTTP_out_rs, plist_file, output_file, output_file2, output_file3
 
-    # The number of time windows in 1 sec.
-    multi_count_in_sec = 20
+    # Initialize time window settings
+    multi_count_in_sec = 20  # 20 windows per second = 50ms each window
     time_window = 1000/multi_count_in_sec
     filename_subfix = "-" + str(time_window) + "ms-ALL"
     
+    # Create output filenames with format: timeSpan_tier_metrictype_workload-50ms-ALL.csv
     output_file = timeSpan + "_" + tier + "_multiplicity_wl" + workload + filename_subfix + ".csv"
     output_file2 = timeSpan + "_" + tier + "_responsetime_wl" + workload + filename_subfix + ".csv"
     output_file3 = timeSpan + "_" + tier + "_inout_wl" + workload + filename_subfix + ".csv"
 
+    # Convert time strings to epoch timestamps
     stime_epoch = time.mktime(time.strptime(startTime, '%Y%m%d%H%M%S'))
     etime_epoch = time.mktime(time.strptime(endTime, '%Y%m%d%H%M%S'))
     #--------------------------------------------------------------------------------
@@ -52,6 +58,12 @@ def init(tier):
 
 
 def main():
+    """Main processing function that:
+    1. Reads and processes the input file
+    2. Calculates metrics per time window
+    3. Outputs results to CSV files
+    """
+    # Extract unique request types/models from the input file
     set_of_models = set()
     with open(plist_file) as f:
         for line in f:
@@ -60,44 +72,50 @@ def main():
             parts = line.split(',')
             set_of_models.add(parts[2])
     
+    # Convert set to sorted list and add "total" as first element
     list_of_models = list(set_of_models)
     list_of_models.sort()
     list_of_models.insert(0, "total")
 
+    # Initialize data structures for each model and time window
     models = list_of_models 
     models_title = list_of_models
     for model in models:
+        # Create nested dictionaries for each metric type
         HTTP_input[model] = {}
         HTTP_output[model] = {}
         HTTP_multi[model] = {}
         HTTP_multi_longReqs[model] = {}
         HTTP_in[model] = {}
         HTTP_out_rs[model] = {}
+        
+        # Initialize counters for each time window
         for target_time in range(int(stime_epoch), int(etime_epoch) + 1):
             for ms in range(0, multi_count_in_sec):
                 ms_time = target_time * multi_count_in_sec + ms
+                # Initialize basic counters
                 HTTP_input[model][ms_time] = 0
                 HTTP_output[model][ms_time] = 0
                 HTTP_multi[model][ms_time] = 0
                 HTTP_multi_longReqs[model][ms_time] = 0
-                HTTP_in[model][ms_time] = [[], [], [], [], []]
-                HTTP_in[model][ms_time][0] = 0
-                HTTP_in[model][ms_time][1] = 0.0
-                HTTP_in[model][ms_time][2] = 0
-                HTTP_in[model][ms_time][3] = 0
-                HTTP_in[model][ms_time][4] = 0
+                
+                # Initialize arrays for response time metrics:
+                # [0] = count
+                # [1] = sum (for averaging)
+                # [2] = count of requests >10ms
+                # [3] = count of requests >100ms
+                # [4] = count of requests >1s
+                HTTP_in[model][ms_time] = [0, 0.0, 0, 0, 0]
+                HTTP_out_rs[model][ms_time] = [0, 0.0, 0, 0, 0]
 
-                HTTP_out_rs[model][ms_time] = [[], [], [], [], []]
-                HTTP_out_rs[model][ms_time][0] = 0
-                HTTP_out_rs[model][ms_time][1] = 0.0
-                HTTP_out_rs[model][ms_time][2] = 0
-                HTTP_out_rs[model][ms_time][3] = 0
-                HTTP_out_rs[model][ms_time][4] = 0
-
+    # Process each line in the input file
     for line in open(plist_file):
         try:
-            if "start_time" in line:
+            # Skip header and empty lines
+            if "start_time" in line or len(parts) < 2:
                 continue
+                
+            # Parse request timing data
             parts = line.split(',')
             if len(parts) < 2:
                 break
@@ -105,7 +123,8 @@ def main():
             stime_str = parts[0].replace(' ','').replace('[','').replace('\'','')
             etime_str = parts[1].replace(' ','').replace('[','').replace('\'','')
             reqType_str = parts[2].replace(' ','').replace('[','').replace('\'','')
-
+            
+            # Convert timestamps to seconds and calculate response time
             reqType = reqType_str
             stime = float(stime_str)/1000
             etime = float(etime_str)/1000
@@ -118,20 +137,26 @@ def main():
             if (model == "BrowseStoriesByCategory"):
                 model = "BrowseStoriesInCategory"
 
+            # Update metrics for client requests
             if protocol == 'client':
+                # Increment request start/end counters
                 incInOut(stime, model, HTTP_input)
                 incInOut(etime, model, HTTP_output)
+                
+                # Update concurrent request tracking
                 addMulti2(stime, etime, stime_epoch, etime_epoch, model, multi_count_in_sec, HTTP_multi)
-                if reqRS < 0:
-                    pass
-                else:
+                
+                # Track response time metrics
+                if reqRS >= 0:
                     incInOutRS(stime, reqRS, stime_epoch, etime_epoch, model, multi_count_in_sec, HTTP_in, True)
                     incInOutRS(etime, reqRS, stime_epoch, etime_epoch, model, multi_count_in_sec, HTTP_out_rs, True)
 
         except:
             pass
 
-    # open files for output
+    # Write three output files:
+    
+    # 1. Request input/output counts per time window
     OUTFILE3 = open("%s" % output_file3, 'w')
     # write headers on output files
     OUTFILE3.write("date_time")
@@ -150,7 +175,7 @@ def main():
                                (HTTP_input[model][ms_time], HTTP_output[model][ms_time]))
             OUTFILE3.write("\n")
     OUTFILE3.close()
-
+    # 2. Request multiplicity (concurrent requests) per time window
         # open files for output
     OUTFILE4 = open("%s" % output_file, 'w')
     # write headers on output files
@@ -175,6 +200,7 @@ def main():
     OUTFILE4.close()
 
     # open files for output Response time
+    # 3. Response time metrics per time window
     OUTFILE2 = open("%s" % output_file2, 'w')
     # write headers on output files
     OUTFILE2.write("date_time")
@@ -212,6 +238,13 @@ def main():
 
 
 def incInOut(inc_time, model, dic_multi):
+    """Increment input/output counters for a specific timestamp
+    
+    Args:
+        inc_time: Timestamp of the event
+        model: Request model type
+        dic_multi: Dictionary to store the counts
+    """
     inc_time2 = int(math.floor(inc_time * multi_count_in_sec))
     if inc_time2 < stime_epoch * multi_count_in_sec:
         return
@@ -224,6 +257,17 @@ def incInOut(inc_time, model, dic_multi):
 
 def addMulti2(add_from, add_to, stime_epoch, etime_epoch, model,
               multi_count_in_sec, dic_multi):
+    """Track concurrent requests (multiplicity) over a time range
+    
+    Args:
+        add_from: Start timestamp
+        add_to: End timestamp
+        stime_epoch: Analysis start time
+        etime_epoch: Analysis end time
+        model: Request model type
+        multi_count_in_sec: Number of time windows per second
+        dic_multi: Dictionary to store multiplicity
+    """
     if model == 0:
         pass
     if (add_to < stime_epoch):
@@ -262,6 +306,19 @@ def addMulti2(add_from, add_to, stime_epoch, etime_epoch, model,
 
 def incInOutRS(inc_time, rs, stime_epoch, etime_epoch, model,
              multi_count_in_sec, dic_multi, switch):
+    """Track response time metrics for requests
+    
+    Args:
+        inc_time: Timestamp of the event
+        rs: Response time value
+        model: Request model type
+        switch: Boolean to control counting behavior
+        
+    Tracks:
+    - Total request count
+    - Average response time
+    - Counts of requests in different response time buckets (>10ms, >100ms, >1s)
+    """
     inc_time2 = int(math.floor(inc_time * multi_count_in_sec))
     if inc_time2 < stime_epoch * multi_count_in_sec:
         return

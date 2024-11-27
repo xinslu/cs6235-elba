@@ -66,6 +66,7 @@ do
     sudo scp node-0:$WORK_HOME/set_elba_env.sh $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
     sleep 2
     sudo mv 20* $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/
+    sudo cp -r $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/* $TMP_RESULTS_DIR_BASE/$RUBBOS_RESULTS_DIR_NAME/20*/
   "
 
   ssh node-6 "sudo pkill -9 sysdig"
@@ -84,6 +85,15 @@ done
 echo "Finish RUBBoS"
 
 
+echo "Installing Dependencies for generateResult.sh"
+
 ssh benchmark "
     sudo scp -r node-0:$HOME/scripts_limit $HOME/
+    sudo apt-get update
+    sudo DEBIAN_FRONTEND=noninteractive apt-get install -y python3-pip pdfgrep collectl python2
+    sudo pip3 install pandas matplotlib pandas
+    sudo cp $HOME/scripts_limit/generateResult.sh /experiment-data
+    cd /experiment-data
+    sudo chmod -R +x ./generateResult.sh
+    sudo ./generateResult.sh |& sudo tee output.log > /dev/null
 "

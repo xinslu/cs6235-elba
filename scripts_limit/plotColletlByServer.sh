@@ -32,7 +32,7 @@ do
 	cd $i
 	# gnuplot template file
 	template_file=collectl_tmp.gnuplot
-	cp ../../scripts_limit/collectl_fig.gnuplot ./collectl_tmp.gnuplot
+	cp $HOME/scripts_limit/collectl_fig.gnuplot ./collectl_tmp.gnuplot
 
     con_file=$(ls detailRT-client_*.csv)
     concurrency=$(echo $con_file | egrep -o '[0-9]+')
